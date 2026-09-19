@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPEN FINANCING</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Menu Desktop & Mobile -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <h1>OPEN FINANCING</h1>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" data-page="resumo">
+                    <i class="fa-solid fa-house"></i> Resumo
+                </button>
+                <button class="nav-item" data-page="despesas">
+                    <i class="fa-solid fa-arrow-trend-down"></i> Despesas
+                </button>
+                <button class="nav-item" data-page="receitas">
+                    <i class="fa-solid fa-arrow-trend-up"></i> Receitas
+                </button>
+                <button class="nav-item" data-page="cofrinhos">
+                    <i class="fa-solid fa-piggy-bank"></i> Cofrinhos
+                </button>
+                <button class="nav-item" data-page="cartoes">
+                    <i class="fa-solid fa-credit-card"></i> Cartões
+                </button>
+                <button class="nav-item" data-page="configuracoes">
+                    <i class="fa-solid fa-gear"></i> Configurações
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="theme-toggle" class="btn-theme">
+                    <i class="fa-solid fa-moon"></i> <span>Modo Escuro</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-header">
+                <button id="menu-toggle" class="menu-toggle-btn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h2 id="page-title">Resumo Financeiro</h2>
+                <div class="user-profile">
+                    <i class="fa-solid fa-user-circle"></i>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- PAGE: RESUMO -->
+                <section id="page-resumo" class="page active">
+                    <!-- Filtro de Período do Resumo -->
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <label>Data Inicial</label>
+                            <input type="date" id="resumo-data-inicio">
+                        </div>
+                        <div class="filter-group">
+                            <label>Data Final</label>
+                            <input type="date" id="resumo-data-fim">
+                        </div>
+                        <div class="filter-buttons">
+                            <button class="btn-primary" onclick="aplicarFiltroResumo()"><i class="fa-solid fa-filter"></i> Aplicar Filtro</button>
+                            <button class="btn-secondary" onclick="limparFiltroResumo()">Limpar Filtro</button>
+                        </div>
+                    </div>
+
+                    <div class="cards-grid">
+                        <div class="card-metric">
+                            <div class="metric-icon blue"><i class="fa-solid fa-wallet"></i></div>
+                            <div class="metric-info">
+                                <span>Saldo Total</span>
+                                <h3 id="resumo-saldo">R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="card-metric">
+                            <div class="metric-icon green"><i class="fa-solid fa-arrow-down"></i></div>
+                            <div class="metric-info">
+                                <span>Receitas</span>
+                                <h3 id="resumo-receitas">R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="card-metric">
+                            <div class="metric-icon red"><i class="fa-solid fa-arrow-up"></i></div>
+                            <div class="metric-info">
+                                <span>Despesas (Período)</span>
+                                <h3 id="resumo-despesas">R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="card-metric">
+                            <div class="metric-icon blue"><i class="fa-solid fa-chart-pie"></i></div>
+                            <div class="metric-info">
+                                <span>Economia</span>
+                                <h3 id="resumo-economia">R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="card-metric">
+                            <div class="metric-icon purple"><i class="fa-solid fa-credit-card"></i></div>
+                            <div class="metric-info">
+                                <span>Cartões (Faturas)</span>
+                                <h3 id="resumo-cartoes-val">R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="card-metric">
+                            <div class="metric-icon purple"><i class="fa-solid fa-piggy-bank"></i></div>
+                            <div class="metric-info">
+                                <span>Cofrinhos Guardados</span>
+                                <h3 id="resumo-cofrinhos-val">R$ 0,00</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <div class="card-box">
+                            <h3>Receitas x Despesas</h3>
+                            <div class="chart-container"><canvas id="chartRecDesp"></canvas></div>
+                        </div>
+                        <div class="card-box">
+                            <h3>Gastos por Categoria</h3>
+                            <div class="chart-container"><canvas id="chartCategoria"></canvas></div>
+                        </div>
+                        <div class="card-box">
+                            <h3>Evolução das Despesas</h3>
+                            <div class="chart-container"><canvas id="chartEvolucao"></canvas></div>
+                        </div>
+                        <div class="card-box">
+                            <h3>Gastos por Cartão</h3>
+                            <div class="chart-container"><canvas id="chartCartoes"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-bottom-grid">
+                        <div class="card-box">
+                            <h3>Movimentações Recentes (Período)</h3>
+                            <div class="table-responsive">
+                                <table class="data-table" id="table-despesas-mes">
+                                    <thead>
+                                        <tr>
+                                            <th>Descrição</th>
+                                            <th>Categoria</th>
+                                            <th>Valor</th>
+                                            <th>Data/Parcela</th>
+                                            <th>Cartão</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-box">
+                            <h3>Resumo dos Cartões</h3>
+                            <div id="resumo-cartoes-lista" class="mini-cards-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PAGE: DESPESAS -->
+                <section id="page-despesas" class="page">
+                    <div class="section-header">
+                        <h3>Gerenciar Despesas & Parcelamentos</h3>
+                        <button class="btn-primary" onclick="openModal('modal-despesa')"><i class="fa-solid fa-plus"></i> Nova Despesa</button>
+                    </div>
+
+                    <div class="filters-container">
+                        <input type="text" id="filtrar-texto" placeholder="Pesquisar descrição..." oninput="filtrarDespesas()">
+                        <select id="filtro-mes" onchange="filtrarDespesas()">
+                            <option value="">Todos os Meses</option>
+                            <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+                            <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+                            <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+                            <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                        <select id="filtro-ano" onchange="filtrarDespesas()">
+                            <option value="">Todos os Anos</option>
+                            <option value="2026">2026</option><option value="2025">2025</option>
+                        </select>
+                        <select id="filtro-categoria" onchange="filtrarDespesas()">
+                            <option value="">Todas Categorias</option>
+                            <option value="Alimentação">Alimentação</option><option value="Transporte">Transporte</option>
+                            <option value="Moradia">Moradia</option><option value="Saúde">Saúde</option><option value="Educação">Educação</option>
+                            <option value="Lazer">Lazer</option><option value="Compras">Compras</option><option value="Assinaturas">Assinaturas</option>
+                            <option value="Contas">Contas</option><option value="Outros">Outros</option>
+                        </select>
+                        <button class="btn-secondary" onclick="limparFiltrosDespesas()">Limpar Filtros</button>
+                    </div>
+
+                    <div class="card-box">
+                        <div class="table-responsive">
+                            <table class="data-table" id="tabela-geral-despesas">
+                               <thead>
+                                    <tr>
+                                        <th>Descrição</th>
+                                        <th>Categoria</th>
+                                        <th>Valor</th>
+                                        <th>Data</th>
+                                        <th>Pagamento</th>
+                                        <th>Cartão</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PAGE: RECEITAS -->
+                <section id="page-receitas" class="page">
+                    <div class="section-header">
+                        <h3>Gerenciar Receitas</h3>
+                        <button class="btn-primary" onclick="openModal('modal-receita')"><i class="fa-solid fa-plus"></i> Nova Receita</button>
+                    </div>
+
+                    <!-- Filtro de Período de Receitas -->
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <label>Data Inicial</label>
+                            <input type="date" id="receitas-data-inicio">
+                        </div>
+                        <div class="filter-group">
+                            <label>Data Final</label>
+                            <input type="date" id="receitas-data-fim">
+                        </div>
+                        <div class="filter-buttons">
+                            <button class="btn-primary" onclick="aplicarFiltroReceitas()"><i class="fa-solid fa-filter"></i> Aplicar Filtro</button>
+                            <button class="btn-secondary" onclick="limparFiltroReceitas()">Limpar Filtro</button>
+                        </div>
+                    </div>
+
+                    <div class="card-box">
+                        <div class="table-responsive">
+                            <table class="data-table" id="tabela-geral-receitas">
+                                <thead>
+                                    <tr>
+                                        <th>Descrição</th>
+                                        <th>Categoria</th>
+                                        <th>Valor</th>
+                                        <th>Data</th>
+                                        <th>Conta</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PAGE: COFRINHOS -->
+                <section id="page-cofrinhos" class="page">
+                    <div class="section-header">
+                        <h3>Metas & Cofrinhos</h3>
+                        <button class="btn-primary" onclick="openModal('modal-cofrinho')"><i class="fa-solid fa-plus"></i> Novo Cofrinho</button>
+                    </div>
+                    <div class="cofrinhos-grid" id="cofrinhos-grid"></div>
+                </section>
+
+                <!-- PAGE: CARTÕES -->
+                <section id="page-cartoes" class="page">
+                    <div class="section-header">
+                        <h3>Cartões de Crédito</h3>
+                        <button class="btn-primary" onclick="openModal('modal-cartao')"><i class="fa-solid fa-plus"></i> Novo Cartão</button>
+                    </div>
+                    <div class="cartoes-grid" id="cartoes-grid"></div>
+                </section>
+
+                <!-- PAGE: CONFIGURAÇÕES -->
+                <section id="page-configuracoes" class="page">
+                    <div class="card-box config-box">
+                        <h3>Configurações do Sistema</h3>
+                        <div class="config-item">
+                            <label>Tema Escuro / Claro</label>
+                            <button class="btn-secondary" id="config-theme-btn"><i class="fa-solid fa-circle-half-stroke"></i> Alternar Tema</button>
+                        </div>
+                        <div class="config-item">
+                            <label>Moeda Padrão</label>
+                            <input type="text" value="Real Brasileiro (R$)" disabled>
+                        </div>
+                        <div class="config-item">
+                            <label>Dados do Sistema</label>
+                            <button class="btn-danger" onclick="limparDadosSistema()"><i class="fa-solid fa-trash"></i> Apagar Todos os Dados</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAIS -->
+    <!-- Modal Despesa -->
+    <div class="modal" id="modal-despesa">
+        <div class="modal-content">
+            <h3 id="modal-despesa-titulo">Adicionar Despesa / Parcela</h3>
+            <form id="form-despesa" onsubmit="salvarDespesa(event)">
+                <input type="hidden" id="despesa-id">
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <input type="text" id="despesa-desc" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Valor Total (R$)</label>
+                        <input type="number" step="0.01" id="despesa-valor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="despesa-cat">
+                            <option value="Alimentação">Alimentação</option><option value="Transporte">Transporte</option>
+                            <option value="Moradia">Moradia</option><option value="Saúde">Saúde</option><option value="Educação">Educação</option>
+                            <option value="Lazer">Lazer</option><option value="Compras">Compras</option><option value="Assinaturas">Assinaturas</option>
+                            <option value="Contas">Contas</option><option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" id="despesa-data" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Forma de Pagamento</label>
+                        <select id="despesa-formapg" onchange="toggleCartaoSelect()">
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Pix">Pix</option>
+                            <option value="Débito">Débito</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="grupo-cartao-select" style="display:none;">
+                    <label>Selecione o Cartão</label>
+                    <select id="despesa-cartao"></select>
+                </div>
+                <div class="form-group">
+                    <label>Número de Parcelas (1 para à vista)</label>
+                    <input type="number" id="despesa-parcelas" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Observação</label>
+                    <input type="text" id="despesa-obs">
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modal-despesa')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Receita -->
+    <div class="modal" id="modal-receita">
+        <div class="modal-content">
+            <h3>Adicionar Receita</h3>
+            <form id="form-receita" onsubmit="salvarReceita(event)">
+                <input type="hidden" id="receita-id">
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <input type="text" id="receita-desc" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" step="0.01" id="receita-valor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="receita-cat">
+                            <option value="Salário">Salário</option>
+                            <option value="Freelance">Freelance</option>
+                            <option value="Investimentos">Investimentos</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" id="receita-data" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Conta</label>
+                        <input type="text" id="receita-conta" value="Conta Corrente" required>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modal-receita')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Cartão -->
+    <div class="modal" id="modal-cartao">
+        <div class="modal-content">
+            <h3 id="modal-cartao-titulo">Novo Cartão de Crédito</h3>
+            <form id="form-cartao" onsubmit="salvarCartao(event)">
+                <input type="hidden" id="cartao-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nome do Cartão</label>
+                        <input type="text" id="cartao-nome" placeholder="Ex: Nubank" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Banco</label>
+                        <input type="text" id="cartao-banco" placeholder="Ex: Nubank S.A." required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Limite Total (R$)</label>
+                        <input type="number" step="0.01" id="cartao-limite" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cor do Cartão</label>
+                        <input type="color" id="cartao-cor" value="#820ad1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Dia Fechamento</label>
+                        <input type="number" id="cartao-fechamento" min="1" max="31" value="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Dia Vencimento</label>
+                        <input type="number" id="cartao-vencimento" min="1" max="31" value="17" required>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modal-cartao')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Cofrinho -->
+    <div class="modal" id="modal-cofrinho">
+        <div class="modal-content">
+            <h3>Novo Cofrinho / Meta</h3>
+            <form id="form-cofrinho" onsubmit="salvarCofrinho(event)">
+                <input type="hidden" id="cofrinho-id">
+                <div class="form-group">
+                    <label>Nome da Meta</label>
+                    <input type="text" id="cofrinho-nome" placeholder="Ex: Comprar Computador" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Valor Alvo (R$)</label>
+                        <input type="number" step="0.01" id="cofrinho-alvo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Prazo</label>
+                        <input type="date" id="cofrinho-prazo" required>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modal-cofrinho')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Movimentar Cofrinho -->
+    <div class="modal" id="modal-mov-cofrinho">
+        <div class="modal-content">
+            <h3 id="titulo-mov-cofrinho">Adicionar / Retirar Dinheiro</h3>
+            <form id="form-mov-cofrinho" onsubmit="salvarMovCofrinho(event)">
+                <input type="hidden" id="mov-cofrinho-id">
+                <input type="hidden" id="mov-cofrinho-tipo">
+                <div class="form-group">
+                    <label>Valor (R$)</label>
+                    <input type="number" step="0.01" id="mov-cofrinho-valor" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modal-mov-cofrinho')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+            .then(() => console.log("Service Worker Registrado com Sucesso!"));
+        }
+    </script>
+</body>
+</html>
